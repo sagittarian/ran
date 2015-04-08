@@ -32,9 +32,7 @@ ranx n = ran01 >> ranx (n-1)
 
 -- An infinite list of random numbers, given a seed
 ranList :: Seed -> [Float]
-ranList seed =
-  let (start, next) = runState ran01 seed
-  in start : ranList next
+ranList = evalState $ sequence (repeat ran01)
 
 -- other implementations:
 -- ranList seed = start : rest
@@ -46,6 +44,11 @@ ranList seed =
 --    where
 --      stateList = iterate (>> ran01) ran01
 --      applySeed = fst . ($ seed) . runState
+-- ranList seed =
+--   let (start, next) = runState ran01 seed
+--   in start : ranList next
+
+
 
 -- not sure how to get this one to work
 -- ranList :: Seed -> [Float]
