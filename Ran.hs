@@ -31,8 +31,30 @@ ranx 1 = ran01
 ranx n = ran01 >> ranx (n-1)
 
 -- An infinite list of random numbers, given a seed
-ranList :: Seed -> [Float]
-ranList = evalState $ sequence (repeat ran01)
+ranList :: State Seed a -> Seed -> [a]
+ranList s = evalState $ sequence (repeat s)
+
+ranList01 :: Seed -> [Float]
+ranList01 = ranList ran01
+
+ranRange :: (Enum a) => a -> a -> State Seed a
+ranRange lower upper = do
+  ran <- ran01
+  let rangeIdx = floor (fromIntegral range * ran)
+      result = toEnum $ rangeIdx + lowerIdx
+  return result
+  where
+    lowerIdx = fromEnum lower
+    upperIdx = fromEnum upper
+    range = upperIdx - lowerIdx
+
+ranChoice :: [a] -> State Seed a
+ranChoice xs = do
+  ran <- ran01
+  let idx = floor (ran * fromIntegral (length xs))
+  return $ xs !! idx
+
+-- ranShuffle -- should be interesting
 
 -- other implementations:
 -- ranList seed = start : rest
