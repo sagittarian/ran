@@ -11,7 +11,7 @@ im = 2147483647
 
 type Seed = Int
 
--- The next seed in the series
+-- Calculate the next seed in the series
 nextSeed :: Seed -> Seed
 nextSeed seed = (ia * seed) `mod` im
 
@@ -20,23 +20,27 @@ ran0 :: State Seed Seed
 -- ran0 = state $ join (,) . nextSeed
 ran0 = modify nextSeed >> get
 
--- A pseudorandom number between 0 and 1
+-- A pseudorandom number from [0,1)
 ran01 :: State Seed Float
 ran01 = ran0 >>= \val ->
   return $ fromIntegral val / fromIntegral im
 
 -- A state representing advancing the seed n times
+-- (ignoring the values generated)
 ranx :: Int -> State Seed Float
 ranx 1 = ran01
 ranx n = ran01 >> ranx (n-1)
 
--- An infinite list of random numbers, given a seed
+-- An infinite list of random items, given a State
 ranList :: State Seed a -> Seed -> [a]
 ranList s = evalState $ sequence (repeat s)
 
+-- infinite list from [0,1), given a seed
 ranList01 :: Seed -> [Float]
 ranList01 = ranList ran01
 
+-- State representing taking a random element between lower and upper
+-- of an Enum (including both endpoints)
 ranRange :: (Enum a) => a -> a -> State Seed a
 ranRange lower upper = do
   ran <- ran01
@@ -48,13 +52,14 @@ ranRange lower upper = do
     upperIdx = fromEnum upper
     range = upperIdx - lowerIdx
 
+-- State representing choosing a random item from a list
 ranChoice :: [a] -> State Seed a
 ranChoice xs = do
   ran <- ran01
   let idx = floor (ran * fromIntegral (length xs))
   return $ xs !! idx
 
--- ranShuffle -- should be interesting
+-- ranShuffle -- XXX should be interesting
 
 -- other implementations:
 -- ranList seed = start : rest
