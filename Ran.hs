@@ -40,7 +40,7 @@ ranList01 = ranList ran01
 ranRange :: (Enum a) => a -> a -> State Seed a
 ranRange lower upper = do
   ran <- ran01
-  let rangeIdx = floor (fromIntegral range * ran)
+  let rangeIdx = floor (fromIntegral range * ran + 0.5)
       result = toEnum $ rangeIdx + lowerIdx
   return result
   where
